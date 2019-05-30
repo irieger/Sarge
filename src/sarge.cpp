@@ -1,16 +1,16 @@
 /*
 	sarge.cpp - Implementation file for the Sarge command line argument parser project.
-	
+
 	Revision 0
-	
+
 	Features:
-			- 
-	
+			-
+
 	Notes:
 			-
-			 
+
 	2019/03/16, Maya Posch
-	
+
 */
 
 
@@ -27,17 +27,17 @@ void Sarge::setArgument(std::string arg_short, std::string arg_long, std::string
 	arg->description = desc;
 	arg->hasValue = hasVal;
 	args.push_back(std::move(arg));
-	
+
 	// Set up links.
 	if (!arg_short.empty()) {
 		argNames.insert(std::pair<std::string, Argument*>(arg_short, args.back().get()));
 	}
-	
+
 	if (!arg_long.empty()) {
 		argNames.insert(std::pair<std::string, Argument*>(arg_long, args.back().get()));
 	}
 }
-	
+
 
 // --- SET ARGUMENTS ---
 void Sarge::setArguments(std::vector<Argument> args) {
@@ -58,11 +58,11 @@ bool Sarge::parseArguments(int argc, char** argv) {
 		// Each flag will start with a '-' character. Multiple flags can be joined together in the
 		// same string if they're the short form flag type (one character per flag).
 		std::string entry(argv[i]);
-		
+
 		if (expectValue) {
 			// Copy value.
 			flag_it->second->value = entry;
-			
+
 			expectValue = false;
 		}
 		else if (entry.compare(0, 1, "-") == 0) {
@@ -71,18 +71,18 @@ bool Sarge::parseArguments(int argc, char** argv) {
 			if (entry.compare(0, 2, "--") == 0) {
 				// Long form of flag.
 				entry.erase(0, 2); // Erase the double dash since we no longer need it.
-			
+
 				flag_it = argNames.find(entry);
 				if (flag_it == argNames.end()) {
 					// Flag wasn't found. Abort.
 					std::cerr << "Long flag " << entry << " wasn't found." << std::endl;
 					return false;
 				}
-				
+
 				// Mark as found.
 				flag_it->second->parsed = true;
 				++flagCounter;
-				
+
 				if (flag_it->second->hasValue) {
 					expectValue = true; // Next argument has to be a value string.
 				}
@@ -90,8 +90,8 @@ bool Sarge::parseArguments(int argc, char** argv) {
 			else {
 				// Parse short form flag. Parse all of them sequentially. Only the last one
 				// is allowed to have an additional value following it.
-				entry.erase(0, 1); // Erase the dash.				
-				for (int i = 0; i < entry.length(); ++i) {
+				entry.erase(0, 1); // Erase the dash.
+				for (uint32_t i = 0; i < entry.length(); ++i) {
 					std::string k(&(entry[i]), 1);
 					flag_it = argNames.find(k);
 					if (flag_it == argNames.end()) {
@@ -99,11 +99,11 @@ bool Sarge::parseArguments(int argc, char** argv) {
 						std::cerr << "Short flag " << k << " wasn't found." << std::endl;
 						return false;
 					}
-					
+
 					// Mark as found.
 					flag_it->second->parsed = true;
 					++flagCounter;
-					
+
 					if (flag_it->second->hasValue) {
 						if (i != (entry.length() - 1)) {
 							// Flag isn't at end, thus cannot have value.
@@ -122,9 +122,9 @@ bool Sarge::parseArguments(int argc, char** argv) {
 			return false;
 		}
 	}
-	
+
 	parsed = true;
-	
+
 	return true;
 }
 
@@ -133,15 +133,15 @@ bool Sarge::parseArguments(int argc, char** argv) {
 // Returns whether the flag was found, along with the value if relevant.
 bool Sarge::getFlag(std::string arg_flag, std::string &arg_value) {
 	if (!parsed) { return false; }
-	
+
 	std::map<std::string, Argument*>::const_iterator it = argNames.find(arg_flag);
 	if (it == argNames.end()) { return false; }
 	if (!it->second->parsed) { return false; }
-	
+
 	if (it->second->hasValue) {
 		arg_value = it->second->value;
 	}
-	
+
 	return true;
 }
 
@@ -150,11 +150,11 @@ bool Sarge::getFlag(std::string arg_flag, std::string &arg_value) {
 // Returns whether the flag was found.
 bool Sarge::exists(std::string arg_flag) {
 	if (!parsed) { return false; }
-	
+
 	std::map<std::string, Argument*>::const_iterator it = argNames.find(arg_flag);
-	if (it == argNames.end()) { return false; }	
+	if (it == argNames.end()) { return false; }
 	if (!it->second->parsed) { return false; }
-	
+
 	return true;
 }
 
@@ -167,7 +167,7 @@ void Sarge::printHelp() {
 	std::cout << "\t" << usage << std::endl;
 	std::cout << std::endl;
 	std::cout << "Options: " << std::endl;
-	
+
 	// Print out the options.
 	std::vector<std::unique_ptr<Argument> >::const_iterator it;
 	for (it = args.cbegin(); it != args.cend(); ++it) {
